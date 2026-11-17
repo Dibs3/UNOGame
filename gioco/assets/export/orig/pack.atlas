@@ -1,0 +1,7 @@
+pack.png
+	size: 2048, 1024
+	filter: Linear, Linear
+Pulsante START nero lucido su trasparenza
+	bounds: 1675, 841, 333, 101
+Vortice dorato delle carte UNO
+	bounds: 1, 1, 1672, 941
