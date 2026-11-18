@@ -47,17 +47,12 @@ public class Main extends ApplicationAdapter {
 
         // Configurazione HyperLap2D
         SceneConfiguration config = new SceneConfiguration();
-
         sceneLoader = new SceneLoader(config);
 
         // Informazioni progetto
         ProjectInfoVO project = sceneLoader.getRm().getProjectVO();
-
-        float worldW = (float) project.originalResolution.width
-            / project.pixelToWorld;
-
-        float worldH = (float) project.originalResolution.height
-            / project.pixelToWorld;
+        float worldW = (float) project.originalResolution.width / project.pixelToWorld;
+        float worldH = (float) project.originalResolution.height / project.pixelToWorld;
 
         // Viewport adattivo
         viewport = new ExtendViewport(worldW, worldH);
@@ -71,35 +66,20 @@ public class Main extends ApplicationAdapter {
             NodeComponent.class,
             sceneLoader.getEngine()
         );
-
         int foundStart = -1;
         int foundBackground = -1;
         int last = -1;
-
         for (int child : rootNode.children) {
-
-            MainItemComponent info = ComponentRetriever.get(
-                child,
-                MainItemComponent.class,
-                sceneLoader.getEngine()
-            );
-
+            MainItemComponent info = ComponentRetriever.get(child, MainItemComponent.class, sceneLoader.getEngine());
             String name = info != null ? info.itemIdentifier : "";
-
-            System.out.println(
-                "OGGETTO: entity=" + child + " nome='" + name + "'"
-            );
+            System.out.println("OGGETTO: entity=" + child + " nome='" + name + "'");
 
             last = child;
-
             if (name != null) {
-
                 String lowerName = name.toLowerCase();
-
                 if (lowerName.contains(START_NAME)) {
                     foundStart = child;
                 }
-
                 if (lowerName.contains("background")) {
                     foundBackground = child;
                 }
@@ -111,20 +91,16 @@ public class Main extends ApplicationAdapter {
         if (foundBackground == -1) {
             foundBackground = 1;
         }
-
         if (foundStart == -1) {
             foundStart = last;
         }
-
         backgroundEntity = foundBackground;
         startEntity = foundStart;
-
         System.out.println("Background entity = " + backgroundEntity);
         System.out.println("START entity = " + startEntity);
 
         // Creazione sfondo responsive
         if (backgroundEntity != -1) {
-
             background = new ResponsiveBackground(
                 sceneLoader,
                 viewport,
@@ -145,113 +121,71 @@ public class Main extends ApplicationAdapter {
                 int pointer,
                 int button
             ) {
-
                 Vector2 position = viewport.unproject(
                     new Vector2(screenX, screenY)
                 );
-
                 System.out.println(
                     "Click a: " + position.x + ", " + position.y
                 );
-
                 if (isInsideStart(position.x, position.y)) {
-
                     onStartClicked();
-
                     return true;
                 }
-
                 return false;
             }
         });
 
         // Adatta lo sfondo già all'avvio
-        resize(
-            Gdx.graphics.getWidth(),
-            Gdx.graphics.getHeight()
-        );
-
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     // Controlla se il click è dentro START
     private boolean isInsideStart(float x, float y) {
-
         if (startEntity == -1 || sceneLoader == null) {
             return false;
         }
-
         TransformComponent transform = ComponentRetriever.get(
             startEntity,
             TransformComponent.class,
             sceneLoader.getEngine()
         );
-
         DimensionsComponent dimensions = ComponentRetriever.get(
             startEntity,
             DimensionsComponent.class,
             sceneLoader.getEngine()
         );
-
         if (transform == null || dimensions == null) {
             return false;
         }
-
         float width = dimensions.width * transform.scaleX;
         float height = dimensions.height * transform.scaleY;
+        float minX = Math.min(transform.x, transform.x + width);
+        float maxX = Math.max(transform.x, transform.x + width);
+        float minY = Math.min(transform.y, transform.y + height);
+        float maxY = Math.max(transform.y, transform.y + height);
 
-        float minX = Math.min(
-            transform.x,
-            transform.x + width
-        );
-
-        float maxX = Math.max(
-            transform.x,
-            transform.x + width
-        );
-
-        float minY = Math.min(
-            transform.y,
-            transform.y + height
-        );
-
-        float maxY = Math.max(
-            transform.y,
-            transform.y + height
-        );
-
-        return x >= minX && x <= maxX
-            && y >= minY && y <= maxY;
+        return x >= minX && x <= maxX && y >= minY && y <= maxY;
     }
 
     // Azione quando viene cliccato START
     private void onStartClicked() {
-
         if (connecting || client == null) {
             return;
         }
-
         connecting = true;
-
         System.out.println("START cliccato!");
 
         // Connessione in thread separato
         Thread connectionThread = new Thread(() -> {
-
             try {
-
                 client.connect();
-
             } catch (Exception e) {
-
                 e.printStackTrace();
-
             } finally {
-
                 Gdx.app.postRunnable(() -> {
                     connecting = false;
                 });
             }
-
         });
 
         connectionThread.setName("Client-Connection-Thread");
@@ -261,31 +195,21 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-
         ScreenUtils.clear(0f, 0f, 0f, 1f);
-
         if (sceneLoader == null || viewport == null) {
             return;
         }
-
         viewport.apply();
-
-        sceneLoader.getEngine().setDelta(
-            Gdx.graphics.getDeltaTime()
-        );
-
+        sceneLoader.getEngine().setDelta(Gdx.graphics.getDeltaTime());
         sceneLoader.getEngine().process();
     }
 
     @Override
     public void resize(int width, int height) {
-
         if (width <= 0 || height <= 0) {
             return;
         }
-
         viewport.update(width, height, true);
-
         sceneLoader.resize(width, height);
 
         // Applichiamo nuovamente il viewport
@@ -293,20 +217,37 @@ public class Main extends ApplicationAdapter {
 
         // Ridimensioniamo lo sfondo per ultimo
         background.resize();
-
+        centraStart();
         System.out.println("Finestra: " + width + "x" + height);
-        System.out.println("Mondo: "
-            + viewport.getWorldWidth() + "x"
-            + viewport.getWorldHeight());
+        System.out.println("Mondo: " + viewport.getWorldWidth() + "x" + viewport.getWorldHeight());
     }
 
     @Override
     public void dispose() {
-
         Gdx.input.setInputProcessor(null);
-
         if (sceneLoader != null) {
             sceneLoader.dispose();
         }
+    }
+
+    private void centraStart() {
+        if (startEntity == -1) {
+            return;
+        }
+        TransformComponent transform = ComponentRetriever.get(startEntity, TransformComponent.class, sceneLoader.getEngine());
+        DimensionsComponent dimensions = ComponentRetriever.get(startEntity, DimensionsComponent.class, sceneLoader.getEngine());
+        if (transform == null || dimensions == null) {
+            return;
+        }
+        float worldWidth = viewport.getWorldWidth();
+        float worldHeight = viewport.getWorldHeight();
+
+        // Centro del mondo visibile
+        float centerX = viewport.getCamera().position.x;
+        float centerY = (viewport.getCamera().position.y)-410;
+
+        // Il pulsante ha l'origine al centro in HyperLap2D
+        transform.x = centerX - dimensions.width / 2f;
+        transform.y = centerY - dimensions.height / 2f;
     }
 }
