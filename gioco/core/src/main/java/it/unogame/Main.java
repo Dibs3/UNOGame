@@ -25,8 +25,11 @@ public class Main extends ApplicationAdapter {
     // Nome dell'oggetto START in HyperLap2D
     private static final String START_NAME = "start";
 
-    // Nome della scena esportata
-    private static final String SCENE_NAME = "MainScene";
+    // Nome della scena principale
+    private static final String MAIN_SCENE = "MainScene";
+
+    // Nome della scena di autenticazione
+    private static final String LOGIN_SCENE = "Login";
 
     private SceneLoader sceneLoader;
     private Viewport viewport;
@@ -58,7 +61,7 @@ public class Main extends ApplicationAdapter {
         viewport = new ExtendViewport(worldW, worldH);
 
         // Caricamento scena
-        sceneLoader.loadScene(SCENE_NAME, viewport);
+        sceneLoader.loadScene(MAIN_SCENE, viewport);
 
         // Recupero oggetti della scena
         NodeComponent rootNode = ComponentRetriever.get(
@@ -169,28 +172,38 @@ public class Main extends ApplicationAdapter {
 
     // Azione quando viene cliccato START
     private void onStartClicked() {
+
         if (connecting || client == null) {
             return;
         }
         connecting = true;
         System.out.println("START cliccato!");
 
-        // Connessione in thread separato
         Thread connectionThread = new Thread(() -> {
-            try {
-                client.connect();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                Gdx.app.postRunnable(() -> {
-                    connecting = false;
-                });
-            }
+
+            boolean ok = client.connect();
+
+            // Il cambio scena va fatto nel thread principale di LibGDX
+            Gdx.app.postRunnable(() -> {
+                connecting = false;
+                if (ok) {
+                    goToNextScene();
+                }
+            });
         });
 
         connectionThread.setName("Client-Connection-Thread");
         connectionThread.setDaemon(true);
         connectionThread.start();
+    }
+
+    private void goToNextScene() {
+        // START non esiste piu' nella nuova scena: smetto di cercarlo
+        startEntity = -1;
+
+        sceneLoader.loadScene(LOGIN_SCENE, viewport);
+
+        System.out.println("Scena cambiata: " + LOGIN_SCENE);
     }
 
     @Override

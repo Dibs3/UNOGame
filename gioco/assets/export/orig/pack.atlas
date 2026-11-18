@@ -1,7 +1,11 @@
 pack.png
-	size: 2048, 1024
+	size: 2048, 2048
 	filter: Linear, Linear
-Pulsante START nero lucido su trasparenza
-	bounds: 1675, 841, 333, 101
-Vortice dorato delle carte UNO
-	bounds: 1, 1, 1672, 941
+Avatar con carte UNO e anello luminoso
+	bounds: 1703, 1621, 227, 166
+UNO sfocato tra colori luminosi
+	bounds: 1, 1, 1678, 937
+background
+	bounds: 1, 940, 1700, 950
+start
+	bounds: 1703, 1789, 333, 101

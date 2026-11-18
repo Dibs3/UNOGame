@@ -8,7 +8,7 @@ public class Client {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void connect() {
+    public boolean connect() {
         try {
             socket = new Socket("127.0.0.1", 1234);
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -17,8 +17,11 @@ public class Client {
 
             out.println("Ciao dal client!");
             System.out.println("Risposta server: " + in.readLine());
+            return true;
+
         } catch (Exception e) {
             System.out.println("Errore di connessione: " + e.getMessage());
+            return false;
         }
     }
 }
