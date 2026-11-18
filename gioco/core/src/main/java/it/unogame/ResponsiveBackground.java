@@ -69,7 +69,7 @@ public class ResponsiveBackground {
         transform.scaleX = originalScaleX * scale;
         transform.scaleY = originalScaleY * scale;
 
-        transform.x = (worldWidth - newWidth) / 2f;
-        transform.y = (worldHeight - newHeight) / 2f;
+        transform.x = (worldWidth - originalWidth) / 2f;
+        transform.y = (worldHeight - originalHeight) / 2f;
     }
 }
